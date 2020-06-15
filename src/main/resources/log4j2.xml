@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="600" name="impactanalysisapi" packages="com.api.impactanalysis">
+	<Properties>
+	    <Property name="logsFolder">logs</Property>
+		<Property name="logsLevel">debug</Property>
+	    <property name="logsBackupFolder">backup</property>
+	    <property name="pattern">[%d{MMM dd, yyyy HH:mm:ss,SSS}][%p][%t][%c{1}] - %m%n%ex</property>
+	    <property name="sizeBasedTriggeringPolicyValue">51200 KB</property> <!-- On every 50 MB -->
+	    <property name="defaultRolloverStrategyMaxValue">1000</property> <!-- Max 1000 files -->
+		<Property name="root-file">api.log</Property>
+	</Properties>
+	
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="${pattern}"/>
+		</Console>
+		<RollingFile name="appender-root-file" fileName="${logsFolder}/${root-file}" append="true" immediateFlush="false" 
+			bufferSize="1048576" filePattern="${logsFolder}/${logsBackupFolder}/${date:yyyy-MM}/${root-file}-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="${pattern}"/>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="${sizeBasedTriggeringPolicyValue}" /> 
+			</Policies>
+			<DefaultRolloverStrategy max="${defaultRolloverStrategyMaxValue}" />
+		</RollingFile>
+		
+		<Async name="rootLog" includeLocation="false">
+			<AppenderRef ref="appender-root-file" />
+		</Async>
+	</Appenders>
+	
+	<Loggers>
+		<asyncLogger name="com.api.impactanalysis" level="${logsLevel}" additivity="false" includeLocation="false">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="rootLog" />
+		</asyncLogger>
+		<asyncRoot level="${logsLevel}" additivity="false" includeLocation="false">
+			<AppenderRef ref="rootLog" />
+		</asyncRoot>
+	</Loggers>
+</Configuration>
