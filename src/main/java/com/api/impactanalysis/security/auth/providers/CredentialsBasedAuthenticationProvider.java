@@ -23,34 +23,36 @@ import com.api.impactanalysis.service.DatabaseUserService;
 
 @Component
 public class CredentialsBasedAuthenticationProvider implements AuthenticationProvider {
-	private final BCryptPasswordEncoder encoder;
-	private final DatabaseUserService userService;
+    private final BCryptPasswordEncoder encoder;
+    private final DatabaseUserService userService;
 
-	@Autowired
-	public CredentialsBasedAuthenticationProvider(final DatabaseUserService userService, final BCryptPasswordEncoder encoder) {
-		this.userService = userService;
-		this.encoder = encoder;
-	}
+    @Autowired
+    public CredentialsBasedAuthenticationProvider(final DatabaseUserService userService, final BCryptPasswordEncoder encoder) {
+        this.userService = userService;
+        this.encoder = encoder;
+    }
 
-	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		Assert.notNull(authentication, "No authentication data provided");
-		String username = (String) authentication.getPrincipal();
-		String password = (String) authentication.getCredentials();
-		User user = userService.getByUsername(username).orElseThrow(() -> new UsernameNotFoundException(String.format("User not found: %s", username)));
-		if (!encoder.matches(password, user.getPassword())) {
-			throw new BadCredentialsException("Authentication Failed. Username or Password not valid.");
-		}
-		if (user.getRoles() == null) {
-			throw new InsufficientAuthenticationException("User has no roles assigned");
-		}
-		List<GrantedAuthority> authorities = user.getRoles().stream().map(authority -> new SimpleGrantedAuthority(authority.getRole().authority())).collect(Collectors.toList());
-		UserInfo userInfo = UserInfo.create(user.getUsername(), authorities);
-		return new UsernamePasswordAuthenticationToken(userInfo, null, userInfo.getAuthorities());
-	}
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        Assert.notNull(authentication, "No authentication data provided");
+        String username = (String) authentication.getPrincipal();
+        String password = (String) authentication.getCredentials();
+        User user = userService.getByUsername(username).orElseThrow(
+                () -> new UsernameNotFoundException(String.format("User not found: %s", username)));
+        if (!encoder.matches(password, user.getPassword())) {
+            throw new BadCredentialsException("Authentication Failed. Username or Password not valid.");
+        }
+        if (user.getRoles() == null) {
+            throw new InsufficientAuthenticationException("User has no roles assigned");
+        }
+        List<GrantedAuthority> authorities = user.getRoles().stream().map(
+                authority -> new SimpleGrantedAuthority(authority.getRole().authority())).collect(Collectors.toList());
+        UserInfo userInfo = UserInfo.create(user.getUsername(), authorities);
+        return new UsernamePasswordAuthenticationToken(userInfo, null, userInfo.getAuthorities());
+    }
 
-	@Override
-	public boolean supports(Class<?> authentication) {
-		return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
-	}
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
+    }
 }

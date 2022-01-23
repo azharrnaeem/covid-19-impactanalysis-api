@@ -29,61 +29,62 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-	@Autowired
-	private AuthenticationSuccessHandler successHandler;
-	@Autowired
-	private RestAuthenticationEntryPoint authenticationEntryPoint;
-	@Autowired
-	private AuthenticationFailureHandler failureHandler;
-	@Autowired
-	private JwtAuthenticationProvider jwtAuthenticationProvider;
-	@Autowired
-	private CredentialsBasedAuthenticationProvider credentialsBasedAuthenticationProvider;
-	@Autowired
-	private HeaderTokenExtractor tokenExtractor;
-	@Autowired
-	private AuthenticationManager authenticationManager;
+    @Autowired
+    private AuthenticationSuccessHandler successHandler;
+    @Autowired
+    private RestAuthenticationEntryPoint authenticationEntryPoint;
+    @Autowired
+    private AuthenticationFailureHandler failureHandler;
+    @Autowired
+    private JwtAuthenticationProvider jwtAuthenticationProvider;
+    @Autowired
+    private CredentialsBasedAuthenticationProvider credentialsBasedAuthenticationProvider;
+    @Autowired
+    private HeaderTokenExtractor tokenExtractor;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	protected JwtTokenAuthenticationProcessingFilter buildJwtTokenAuthenticationProcessingFilter(List<String> pathsToSkip, String pattern) throws Exception {
-		SkipPathRequestMatcher matcher = new SkipPathRequestMatcher(pathsToSkip, pattern);
-		JwtTokenAuthenticationProcessingFilter filter = new JwtTokenAuthenticationProcessingFilter(failureHandler, tokenExtractor, matcher);
-		filter.setAuthenticationManager(this.authenticationManager);
-		return filter;
-	}
+    protected JwtTokenAuthenticationProcessingFilter buildJwtTokenAuthenticationProcessingFilter(List<String> pathsToSkip, String pattern)
+            throws Exception {
+        SkipPathRequestMatcher matcher = new SkipPathRequestMatcher(pathsToSkip, pattern);
+        JwtTokenAuthenticationProcessingFilter filter = new JwtTokenAuthenticationProcessingFilter(failureHandler, tokenExtractor, matcher);
+        filter.setAuthenticationManager(this.authenticationManager);
+        return filter;
+    }
 
-	@Bean
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
-	}
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
 
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) {
-		auth.authenticationProvider(jwtAuthenticationProvider);
-		auth.authenticationProvider(credentialsBasedAuthenticationProvider);
-	}
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(jwtAuthenticationProvider);
+        auth.authenticationProvider(credentialsBasedAuthenticationProvider);
+    }
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf()
-		.disable()
-		.exceptionHandling()
-		.authenticationEntryPoint(this.authenticationEntryPoint)
-		.and().headers().frameOptions().disable()
-		.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-		.and().authorizeRequests().antMatchers(Constants.PERMITTED_END_POINTS.toArray(new String[Constants.PERMITTED_END_POINTS.size()])).permitAll()
-		.and().authorizeRequests().antMatchers(Constants.API_ROOT_URL).authenticated() // By Default all are protected.
-		.and().addFilterBefore(new CustomCorsFilter(), UsernamePasswordAuthenticationFilter.class)
-		.addFilterBefore(buildCredentialsBasedProcessingFilter(Constants.AUTHENTICATION_END_POINT), UsernamePasswordAuthenticationFilter.class)
-		.addFilterBefore(buildJwtTokenAuthenticationProcessingFilter(Constants.PERMITTED_END_POINTS, Constants.API_ROOT_URL), UsernamePasswordAuthenticationFilter.class);
-	}
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable().exceptionHandling().authenticationEntryPoint(
+                this.authenticationEntryPoint).and().headers().frameOptions().disable().and().sessionManagement().sessionCreationPolicy(
+                        SessionCreationPolicy.STATELESS).and().authorizeRequests().antMatchers(
+                                Constants.PERMITTED_END_POINTS.toArray(
+                                        new String[Constants.PERMITTED_END_POINTS.size()])).permitAll().and().authorizeRequests().antMatchers(
+                                                Constants.API_ROOT_URL).authenticated() // By Default all are protected.
+                .and().addFilterBefore(new CustomCorsFilter(), UsernamePasswordAuthenticationFilter.class).addFilterBefore(
+                        buildCredentialsBasedProcessingFilter(Constants.AUTHENTICATION_END_POINT),
+                        UsernamePasswordAuthenticationFilter.class).addFilterBefore(
+                                buildJwtTokenAuthenticationProcessingFilter(Constants.PERMITTED_END_POINTS, Constants.API_ROOT_URL),
+                                UsernamePasswordAuthenticationFilter.class);
+    }
 
-	protected CredentialsBasedProcessingFilter buildCredentialsBasedProcessingFilter(String authEntryPoint) throws Exception {
-		CredentialsBasedProcessingFilter filter = new CredentialsBasedProcessingFilter(authEntryPoint, successHandler, failureHandler, objectMapper);
-		filter.setAuthenticationManager(this.authenticationManager);
-		return filter;
-	}
+    protected CredentialsBasedProcessingFilter buildCredentialsBasedProcessingFilter(String authEntryPoint) throws Exception {
+        CredentialsBasedProcessingFilter filter = new CredentialsBasedProcessingFilter(authEntryPoint, successHandler, failureHandler, objectMapper);
+        filter.setAuthenticationManager(this.authenticationManager);
+        return filter;
+    }
 }

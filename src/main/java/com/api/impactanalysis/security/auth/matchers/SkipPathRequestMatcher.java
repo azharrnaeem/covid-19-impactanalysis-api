@@ -11,21 +11,21 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 
 public class SkipPathRequestMatcher implements RequestMatcher {
-	private OrRequestMatcher matchers;
-	private RequestMatcher processingMatcher;
+    private OrRequestMatcher matchers;
+    private RequestMatcher processingMatcher;
 
-	public SkipPathRequestMatcher(List<String> pathsToSkip, String processingPath) {
-		Assert.notNull(pathsToSkip, "pathsToSkip cannot be null");
-		List<RequestMatcher> m = pathsToSkip.stream().map(path -> new AntPathRequestMatcher(path)).collect(Collectors.toList());
-		matchers = new OrRequestMatcher(m);
-		processingMatcher = new AntPathRequestMatcher(processingPath);
-	}
+    public SkipPathRequestMatcher(List<String> pathsToSkip, String processingPath) {
+        Assert.notNull(pathsToSkip, "pathsToSkip cannot be null");
+        List<RequestMatcher> m = pathsToSkip.stream().map(path -> new AntPathRequestMatcher(path)).collect(Collectors.toList());
+        matchers = new OrRequestMatcher(m);
+        processingMatcher = new AntPathRequestMatcher(processingPath);
+    }
 
-	@Override
-	public boolean matches(HttpServletRequest request) {
-		if (matchers.matches(request)) {
-			return false;
-		}
-		return processingMatcher.matches(request) ? true : false;
-	}
+    @Override
+    public boolean matches(HttpServletRequest request) {
+        if (matchers.matches(request)) {
+            return false;
+        }
+        return processingMatcher.matches(request) ? true : false;
+    }
 }

@@ -112,7 +112,7 @@ class JwtTokenServiceTest {
 		assertEquals("user1", subject);
 	}
 
-	
+
 	@Test
 	@DisplayName("Test empty optional is returned if token is not of refresh type")
 	void testEmptyOptionalIfTokenIsNotOfRefreshType() {
@@ -120,14 +120,4 @@ class JwtTokenServiceTest {
 		String acccessToken = jwtTokenService.createAccessJwtToken(userInfo).getToken();
 		assertEquals(false, jwtTokenService.verifyRefreshToken(new AccessJwtToken(acccessToken)).isPresent());
 	}
-	
-	@Test
-	@DisplayName("Test that when token is expired. Then upon parsing expired token ExpiredJWTException is thrown")
-	void testForExpiredTokenExceptionIsThrown() throws InterruptedException {
-		UserInfo userInfo1 = UserInfo.create("user1", grantedAuthorities);
-		String token1 = jwtTokenService.createAccessJwtToken(userInfo1).getToken();
-		TimeUnit.MINUTES.sleep(configurations.getTokenExpirationTime());
-		assertThrows(ExpiredJWTException.class, ()->jwtTokenService.parseClaims(new AccessJwtToken(token1)));
-	}
-
 }

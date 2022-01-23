@@ -1,7 +1,4 @@
-# Disclaimer
-This is a hands on experience project. Feel free to review and enhance it. 
-
-# covid-19-impactanalysis-api
+# COVID-19-impactanalysis-api
 A simple REST API that can be used to analyze data of globally confirmed cases. It provides multiple endpoints which can be used to fetch data of COVID-19 cases by date, country. Varying cases in the region.
 
 # Configurations
@@ -9,8 +6,15 @@ The spring configurations are placed in application.yml file inside resources di
 
 The data source of COID is also configurable as URL. CSV parser is only written for Johns Hopkins' data source. Its URL was given in assignment document.
 
-# Documentation
-Documentation Link is as following.Please modify port and host as per environment and configuration
-http://localhost:8081/swagger-ui.html#
+# Build
+To build locally type `mvn clean install`.
 
-Special thanks to https://github.com/vkhorikov for some spring security aspects.
+# Run
+To run using dockers
+
+On Windows:** `docker-compose.exe up`
+On Mac/Linux: `docker-compose up`
+
+# Documentation:
+All documentation can be found at (after running application) 
+http://localhost:8080/swagger-ui.html

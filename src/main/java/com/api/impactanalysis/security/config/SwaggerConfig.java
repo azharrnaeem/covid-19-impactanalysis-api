@@ -23,23 +23,18 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 public class SwaggerConfig {
 
-	@Bean
-	public Docket api() {
-		return new Docket(DocumentationType.SWAGGER_2).select()
-				.apis(RequestHandlerSelectors.any())
-				.paths(PathSelectors.ant(Constants.API_ROOT_URL))
-				.build()
-				.pathMapping("/")
-				.apiInfo(metaData())
-				.securitySchemes(securitySchemes());
-	}
+    @Bean
+    public Docket api() {
+        return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.any()).paths(
+                PathSelectors.ant(Constants.API_ROOT_URL)).build().pathMapping("/").apiInfo(metaData()).securitySchemes(securitySchemes());
+    }
 
-	private ApiInfo metaData() {
-		Contact contact = new Contact("Muhammad Azhar Naeem", "https://www.linkedin.com/in/azharrnaeem", "azharrnaeem@gmail.com");
-		return new ApiInfo("Covid Impact Analysis API", "", "1.0", "", contact, "", "", new ArrayList<>());
-	}
-	
-	private List<? extends SecurityScheme> securitySchemes() {
+    private ApiInfo metaData() {
+        Contact contact = new Contact("Muhammad Azhar Naeem", "https://www.linkedin.com/in/azharrnaeem", "azharrnaeem@gmail.com");
+        return new ApiInfo("Covid Impact Analysis API", "", "1.0", "", contact, "", "", new ArrayList<>());
+    }
+
+    private List<? extends SecurityScheme> securitySchemes() {
         return Arrays.asList(new ApiKey("Bearer", "Authorization", "header"));
     }
 }

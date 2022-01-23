@@ -37,33 +37,37 @@ import io.swagger.annotations.Authorization;
 
 @RestController
 public class TokenEndpointsController {
-	@Autowired
-	private JwtTokenService jwtTokenService;
-	@Autowired
-	private UserService userService;
-	@Autowired
-	private HeaderTokenExtractor tokenExtractor;
+    @Autowired
+    private JwtTokenService jwtTokenService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private HeaderTokenExtractor tokenExtractor;
 
-	@ApiOperation(value = "Generates new access token and accepts refresh token return at time of login", authorizations = {@Authorization(value = "Bearer")})
-	@RequestMapping(value = "/api/auth/token", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public @ResponseBody JwtToken refreshToken(@RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader) throws IOException, ServletException {
-		String tokenPayload = tokenExtractor.extract(authorizationHeader);
-		JwtToken rawToken = new AccessJwtToken(tokenPayload);
-		Jws<Claims> orElseThrow = jwtTokenService.verifyRefreshToken(rawToken).orElseThrow(() -> new InvalidJwtToken("Invalid Refresh Token."));
-		String subject = orElseThrow.getBody().getSubject();
-		User user = userService.getByUsername(subject).orElseThrow(() -> new UsernameNotFoundException("User not found: " + subject));
-		if (user.getRoles() == null) {
-			throw new InsufficientAuthenticationException("User has no roles assigned");
-		}
-		List<GrantedAuthority> authorities = user.getRoles().stream().map(authority -> new SimpleGrantedAuthority(authority.getRole().authority())).collect(Collectors.toList());
-		UserInfo userInfo = UserInfo.create(user.getUsername(), authorities);
-		return jwtTokenService.createAccessJwtToken(userInfo);
-	}
+    @ApiOperation(value = "Generates new access token and accepts refresh token return at time of login", authorizations = {
+            @Authorization(value = "Bearer") })
+    @RequestMapping(value = "/api/auth/token", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    public @ResponseBody JwtToken refreshToken(@RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader)
+            throws IOException, ServletException {
+        String tokenPayload = tokenExtractor.extract(authorizationHeader);
+        JwtToken rawToken = new AccessJwtToken(tokenPayload);
+        Jws<Claims> orElseThrow = jwtTokenService.verifyRefreshToken(rawToken).orElseThrow(() -> new InvalidJwtToken("Invalid Refresh Token."));
+        String subject = orElseThrow.getBody().getSubject();
+        User user = userService.getByUsername(subject).orElseThrow(() -> new UsernameNotFoundException("User not found: " + subject));
+        if (user.getRoles() == null) {
+            throw new InsufficientAuthenticationException("User has no roles assigned");
+        }
+        List<GrantedAuthority> authorities = user.getRoles().stream().map(
+                authority -> new SimpleGrantedAuthority(authority.getRole().authority())).collect(Collectors.toList());
+        UserInfo userInfo = UserInfo.create(user.getUsername(), authorities);
+        return jwtTokenService.createAccessJwtToken(userInfo);
+    }
 
-	@ApiOperation(value = "Login with credentials i.e username, password to get token.", authorizations = {@Authorization(value = "Bearer")})
-	@RequestMapping(value = "/api/auth/login", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public LoginTokens login(@RequestBody(required = true) LoginRequest loginRequest) throws IOException, ServletException {
-		//left unimplemented as login is handled through filter and this is for swagger documentation only.
-		return new LoginTokens();
-	}
+    @ApiOperation(value = "Login with credentials i.e username, password to get token.", authorizations = { @Authorization(value = "Bearer") })
+    @RequestMapping(value = "/api/auth/login", method = RequestMethod.POST, consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    public LoginTokens login(@RequestBody(required = true) LoginRequest loginRequest) throws IOException, ServletException {
+        // left unimplemented as login is handled through filter and this is for swagger documentation only.
+        return new LoginTokens();
+    }
 }

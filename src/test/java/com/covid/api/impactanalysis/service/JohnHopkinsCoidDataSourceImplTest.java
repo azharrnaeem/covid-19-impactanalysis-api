@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -30,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
 import com.api.impactanalysis.security.config.Configurations;
 import com.api.impactanalysis.security.exceptions.DataNotFound;
 import com.api.impactanalysis.service.JohnHopkinsCoidDataSourceImpl;
+import com.opencsv.exceptions.CsvValidationException;
 
 class JohnHopkinsCoidDataSourceImplTest {
 	private JohnHopkinsCoidDataSourceImpl johnHopkinsCoidDataSourceImpl;
@@ -51,7 +53,7 @@ class JohnHopkinsCoidDataSourceImplTest {
 
 	@Test
 	@DisplayName("Test that Implementation of Coivd datasource retreive data from configured URL.")
-	void testConfiguredURLIsUsedForData() throws URISyntaxException, DataNotFound {
+	void testConfiguredURLIsUsedForData() throws URISyntaxException, DataNotFound, CsvValidationException, IOException {
 		URI testURI = new URI("http://localhost/test");
 		when(responseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
 		when(responseEntity.getBody()).thenReturn("Test data");
@@ -91,7 +93,7 @@ class JohnHopkinsCoidDataSourceImplTest {
 
 	@Test
 	@DisplayName("Test if URL doesn't return with OK http status then an empty map is return.")
-	void testEmptyMapIfCallToURLIsNotSuccess() throws URISyntaxException, DataNotFound {
+	void testEmptyMapIfCallToURLIsNotSuccess() throws URISyntaxException, DataNotFound, CsvValidationException, IOException {
 		URI testURI = new URI("http://localhost/test");
 		when(responseEntity.getStatusCode()).thenReturn(HttpStatus.SERVICE_UNAVAILABLE);
 		when(configurations.getCovidDataSourceURL()).thenReturn(testURI);
@@ -102,7 +104,7 @@ class JohnHopkinsCoidDataSourceImplTest {
 
 	@Test
 	@DisplayName("Test there are less than 5 tokens then map returned is empty.")
-	void testEmptyMapOnLessThanFiveTokens() throws URISyntaxException, DataNotFound {
+	void testEmptyMapOnLessThanFiveTokens() throws URISyntaxException, DataNotFound, CsvValidationException, IOException {
 		URI testURI = new URI("http://localhost/test");
 		when(responseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
 		when(responseEntity.getBody()).thenReturn("Token1,Token2,Token3,Token4\nt1,t2,t3,t4");
@@ -114,7 +116,7 @@ class JohnHopkinsCoidDataSourceImplTest {
 
 	@Test
 	@DisplayName("Test if there is only header in response.")
-	void testEmptyMapIfOnlyHeaderInResponse() throws URISyntaxException, DataNotFound {
+	void testEmptyMapIfOnlyHeaderInResponse() throws URISyntaxException, DataNotFound, CsvValidationException, IOException {
 		URI testURI = new URI("http://localhost/test");
 		when(responseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
 		when(responseEntity.getBody()).thenReturn("Token1,Token2,Token3,Token4,Token5");
@@ -126,7 +128,7 @@ class JohnHopkinsCoidDataSourceImplTest {
 
 	@Test
 	@DisplayName("Test data is parsed correctly.")
-	void testDataParsing() throws URISyntaxException, DataNotFound {
+	void testDataParsing() throws URISyntaxException, DataNotFound, CsvValidationException, IOException {
 		URI testURI = new URI("http://localhost/test");
 		when(responseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
 		when(responseEntity.getBody()).thenReturn("Province/State,Country/Region,Lat,Long,1/22/20\n" + ",Pakistan,30.3753,69.3451,0");
@@ -138,11 +140,11 @@ class JohnHopkinsCoidDataSourceImplTest {
 
 	@Test
 	@DisplayName("Test data is parsed correctly and grouped by date.")
-	void testDataDataIsGroupedByDate() throws URISyntaxException, DataNotFound {
+	void testDataDataIsGroupedByDate() throws URISyntaxException, DataNotFound, CsvValidationException, IOException {
 		URI testURI = new URI("http://localhost/test");
 		when(responseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(responseEntity.getBody()).thenReturn("Province/State,Country/Region,Lat,Long,1/22/20\n" 
-		+ ",Pakistan,30.3753,69.3451,0\n" 
+		when(responseEntity.getBody()).thenReturn("Province/State,Country/Region,Lat,Long,1/22/20\n"
+		+ ",Pakistan,30.3753,69.3451,0\n"
 		+ ",Australia,30.3753,69.3451,0");
 		when(configurations.getCovidDataSourceURL()).thenReturn(testURI);
 		when(restTemplate.getForEntity(testURI, String.class)).thenReturn(responseEntity);
@@ -151,14 +153,14 @@ class JohnHopkinsCoidDataSourceImplTest {
 		assertEquals(1, casesData.size(), "There is not data in response but header only");
 		assertEquals(2, casesData.get(date).size(), "Two Entries expected in map");
 	}
-	
+
 	@Test
-	@DisplayName("Test that if there is commas between inverted commas of a token then its is paresed as one token. i.e \"South, Korea\" here comma in between name shouldn't considered as token")
-	void testDateWithCommasInBetweenNameOfCountryIsParsedCorrectly() throws URISyntaxException, DataNotFound {
+	@DisplayName("Test that if there is comma between inverted commas of a token then its is paresed as one token. i.e \"South, Korea\" here comma in between name shouldn't considered as token")
+	void testDateWithCommasInBetweenNameOfCountryIsParsedCorrectly() throws URISyntaxException, DataNotFound, CsvValidationException, IOException {
 		URI testURI = new URI("http://localhost/test");
 		when(responseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(responseEntity.getBody()).thenReturn("Province/State,Country/Region,Lat,Long,1/22/20\n" 
-		+ ",\"South, Korea\",30.3753,69.3451,0\n" 
+		when(responseEntity.getBody()).thenReturn("Province/State,Country/Region,Lat,Long,1/22/20\n"
+		+ ",\"South, Korea\",30.3753,69.3451,0\n"
 		+ ",Australia,30.3753,69.3451,0");
 		when(configurations.getCovidDataSourceURL()).thenReturn(testURI);
 		when(restTemplate.getForEntity(testURI, String.class)).thenReturn(responseEntity);
@@ -167,14 +169,14 @@ class JohnHopkinsCoidDataSourceImplTest {
 		assertEquals(1, casesData.size(), "There is not data in response but header only");
 		assertEquals(2, casesData.get(date).size(), "Two Entries expected in map");
 	}
-	
+
 	@Test
 	@DisplayName("Test if a row contains invalid token then its is skipped and hence not returned in map. i.e instead of nummber a string Avb is given in token")
-	void testInvalidRowsAreSkipped() throws URISyntaxException, DataNotFound {
+	void testInvalidRowsAreSkipped() throws URISyntaxException, DataNotFound, CsvValidationException, IOException {
 		URI testURI = new URI("http://localhost/test");
 		when(responseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(responseEntity.getBody()).thenReturn("Province/State,Country/Region,Lat,Long,1/22/20\n" 
-		+ ",Pakistan,30.3753,69.3451,0\n" 
+		when(responseEntity.getBody()).thenReturn("Province/State,Country/Region,Lat,Long,1/22/20\n"
+		+ ",Pakistan,30.3753,69.3451,0\n"
 		+ ",India,30.3753,69.3451,Avb\n"
 		+ ",Australia,30.3753,69.3451,0");
 		when(configurations.getCovidDataSourceURL()).thenReturn(testURI);
@@ -184,16 +186,16 @@ class JohnHopkinsCoidDataSourceImplTest {
 		assertEquals(1, casesData.size(), "There is not data in response but header only");
 		assertEquals(2, casesData.get(date).size(), "Two Entries expected in map");
 	}
-	
-	
+
+
 	@Test
 	@DisplayName("Test that country wise data is maintained for multiple entries of same country for single date")
-	void testCountryWiseCount() throws URISyntaxException, DataNotFound {
+	void testCountryWiseCount() throws URISyntaxException, DataNotFound, CsvValidationException, IOException {
 		URI testURI = new URI("http://localhost/test");
 		when(responseEntity.getStatusCode()).thenReturn(HttpStatus.OK);
-		when(responseEntity.getBody()).thenReturn("Province/State,Country/Region,Lat,Long,1/22/20,1/23/20\n" 
-		+ ",Pakistan,30.3753,69.10,10,300\n" 
-		+ ",Pakistan,30.3753,69.20,20\n" 
+		when(responseEntity.getBody()).thenReturn("Province/State,Country/Region,Lat,Long,1/22/20,1/23/20\n"
+		+ ",Pakistan,30.3753,69.10,10,300\n"
+		+ ",Pakistan,30.3753,69.20,20\n"
 		+ ",Australia,30.3753,69.3451,15");
 		when(configurations.getCovidDataSourceURL()).thenReturn(testURI);
 		when(restTemplate.getForEntity(testURI, String.class)).thenReturn(responseEntity);

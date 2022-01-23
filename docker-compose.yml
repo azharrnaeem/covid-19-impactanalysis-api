@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  impactanalysis-app:
+    image: azharrnaeem/impactanalysis
+    container_name: impactanalysis
+    environment:
+      - JAVA_JVM_ARGS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    ports:
+      - "8080:8080"
+      - "5005:5005"

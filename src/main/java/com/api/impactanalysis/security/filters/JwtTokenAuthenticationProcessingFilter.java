@@ -22,34 +22,38 @@ import com.api.impactanalysis.security.auth.JwtAuthenticationTokenImpl;
 import com.api.impactanalysis.security.auth.matchers.extractor.HeaderTokenExtractor;
 
 public class JwtTokenAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
-	private final AuthenticationFailureHandler failureHandler;
-	private final HeaderTokenExtractor tokenExtractor;
+    private final AuthenticationFailureHandler failureHandler;
+    private final HeaderTokenExtractor tokenExtractor;
 
-	@Autowired
-	public JwtTokenAuthenticationProcessingFilter(AuthenticationFailureHandler failureHandler, HeaderTokenExtractor tokenExtractor, RequestMatcher matcher) {
-		super(matcher);
-		this.failureHandler = failureHandler;
-		this.tokenExtractor = tokenExtractor;
-	}
+    @Autowired
+    public JwtTokenAuthenticationProcessingFilter(AuthenticationFailureHandler failureHandler, HeaderTokenExtractor tokenExtractor,
+            RequestMatcher matcher) {
+        super(matcher);
+        this.failureHandler = failureHandler;
+        this.tokenExtractor = tokenExtractor;
+    }
 
-	@Override
-	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
-		String tokenPayload = request.getHeader(Constants.AUTHENTICATION_HEADER_KEY);
-		AccessJwtToken token = new AccessJwtToken(tokenExtractor.extract(tokenPayload));
-		return getAuthenticationManager().authenticate(new JwtAuthenticationTokenImpl(token));
-	}
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException, IOException, ServletException {
+        String tokenPayload = request.getHeader(Constants.AUTHENTICATION_HEADER_KEY);
+        AccessJwtToken token = new AccessJwtToken(tokenExtractor.extract(tokenPayload));
+        return getAuthenticationManager().authenticate(new JwtAuthenticationTokenImpl(token));
+    }
 
-	@Override
-	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-		SecurityContext context = SecurityContextHolder.createEmptyContext();
-		context.setAuthentication(authResult);
-		SecurityContextHolder.setContext(context);
-		chain.doFilter(request, response);
-	}
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult)
+            throws IOException, ServletException {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authResult);
+        SecurityContextHolder.setContext(context);
+        chain.doFilter(request, response);
+    }
 
-	@Override
-	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-		SecurityContextHolder.clearContext();
-		failureHandler.onAuthenticationFailure(request, response, failed);
-	}
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed)
+            throws IOException, ServletException {
+        SecurityContextHolder.clearContext();
+        failureHandler.onAuthenticationFailure(request, response, failed);
+    }
 }

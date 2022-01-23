@@ -24,27 +24,27 @@ import io.jsonwebtoken.Jws;
 @Component
 @SuppressWarnings("unchecked")
 public class JwtAuthenticationProvider implements AuthenticationProvider {
-	private final JwtTokenService jwtTokenService;
+    private final JwtTokenService jwtTokenService;
 
-	@Autowired
-	public JwtAuthenticationProvider(JwtTokenService jwtTokenService) {
-		this.jwtTokenService = jwtTokenService;
-	}
+    @Autowired
+    public JwtAuthenticationProvider(JwtTokenService jwtTokenService) {
+        this.jwtTokenService = jwtTokenService;
+    }
 
-	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		JwtToken rawAccessToken = (AccessJwtToken) authentication.getCredentials();
-		Jws<Claims> jwsClaims = jwtTokenService.parseClaims(rawAccessToken);
-		String subject = jwsClaims.getBody().getSubject();
-		jwtTokenService.validateIfTokenIsExplicitlyInvalidated(rawAccessToken.getToken(), subject);
-		List<String> scopes = jwsClaims.getBody().get(Constants.SCOPES, List.class);
-		List<GrantedAuthority> authorities = scopes.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-		UserInfo userInfo = UserInfo.create(subject, authorities);
-		return new JwtAuthenticationTokenImpl(userInfo, userInfo.getAuthorities());
-	}
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        JwtToken rawAccessToken = (AccessJwtToken) authentication.getCredentials();
+        Jws<Claims> jwsClaims = jwtTokenService.parseClaims(rawAccessToken);
+        String subject = jwsClaims.getBody().getSubject();
+        jwtTokenService.validateIfTokenIsExplicitlyInvalidated(rawAccessToken.getToken(), subject);
+        List<String> scopes = jwsClaims.getBody().get(Constants.SCOPES, List.class);
+        List<GrantedAuthority> authorities = scopes.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        UserInfo userInfo = UserInfo.create(subject, authorities);
+        return new JwtAuthenticationTokenImpl(userInfo, userInfo.getAuthorities());
+    }
 
-	@Override
-	public boolean supports(Class<?> authentication) {
-		return (JwtAuthenticationTokenImpl.class.isAssignableFrom(authentication));
-	}
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return (JwtAuthenticationTokenImpl.class.isAssignableFrom(authentication));
+    }
 }

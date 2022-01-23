@@ -20,24 +20,26 @@ import io.swagger.annotations.Authorization;
 
 @RestController
 public class UserEndpointsController {
-	private final JwtTokenService jwtTokenFactory;
+    private final JwtTokenService jwtTokenFactory;
 
-	@Autowired
-	public UserEndpointsController(JwtTokenService jwtTokenFactory) {
-		this.jwtTokenFactory = jwtTokenFactory;
-	}
+    @Autowired
+    public UserEndpointsController(JwtTokenService jwtTokenFactory) {
+        this.jwtTokenFactory = jwtTokenFactory;
+    }
 
-	@ApiOperation(value = "Return username against token", authorizations = {@Authorization(value = "Bearer")})
-	@RequestMapping(value = "/api/users/me", method = RequestMethod.GET)
-	public @ResponseBody UserInfo getCurrentUser(JwtAuthenticationTokenImpl token, @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader) {
-		return (UserInfo) token.getPrincipal();
-	}
+    @ApiOperation(value = "Return username against token", authorizations = { @Authorization(value = "Bearer") })
+    @RequestMapping(value = "/api/users/me", method = RequestMethod.GET)
+    public @ResponseBody UserInfo getCurrentUser(JwtAuthenticationTokenImpl token,
+            @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader) {
+        return (UserInfo) token.getPrincipal();
+    }
 
-	@ApiOperation(value = "Returns all users who have genrated a token and is still valid.", authorizations = {@Authorization(value = "Bearer")})
-	@RequestMapping(value = "/api/users/allauthenticated", method = RequestMethod.GET)
-	public @ResponseBody Map<String, Collection<String>> getAllAutenticatedUsers(@RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader) {
-		Map<String, Collection<String>> mapper = new ConcurrentHashMap<>();
-		mapper.put("authenticatedUsers", jwtTokenFactory.getAllAuthenticatedUsers());
-		return mapper;
-	}
+    @ApiOperation(value = "Returns all users who have genrated a token and is still valid.", authorizations = { @Authorization(value = "Bearer") })
+    @RequestMapping(value = "/api/users/allauthenticated", method = RequestMethod.GET)
+    public @ResponseBody Map<String, Collection<String>> getAllAutenticatedUsers(
+            @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader) {
+        Map<String, Collection<String>> mapper = new ConcurrentHashMap<>();
+        mapper.put("authenticatedUsers", jwtTokenFactory.getAllAuthenticatedUsers());
+        return mapper;
+    }
 }

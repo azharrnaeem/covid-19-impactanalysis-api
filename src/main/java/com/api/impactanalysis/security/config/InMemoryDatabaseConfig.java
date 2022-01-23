@@ -7,10 +7,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class InMemoryDatabaseConfig {
-	@Bean
-	public ServletRegistrationBean<WebServlet> h2servletRegistration() {
-		ServletRegistrationBean<WebServlet> registration = new ServletRegistrationBean<>(new WebServlet());
-		registration.addUrlMappings("/console/*");
-		return registration;
-	}
+    @Bean
+    public ServletRegistrationBean<WebServlet> h2servletRegistration() {
+        ServletRegistrationBean<WebServlet> registration = new ServletRegistrationBean<>(new WebServlet());
+        registration.addUrlMappings("/console/*");
+        return registration;
+    }
 }

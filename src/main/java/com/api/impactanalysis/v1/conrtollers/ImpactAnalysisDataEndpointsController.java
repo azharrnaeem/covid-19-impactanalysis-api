@@ -26,41 +26,58 @@ import io.swagger.annotations.Authorization;
 
 @RestController
 public class ImpactAnalysisDataEndpointsController {
-	private final DataAnalysisService impactAnalysisService;
+    private final DataAnalysisService impactAnalysisService;
 
-	@Autowired
-	public ImpactAnalysisDataEndpointsController(DataAnalysisService impactAnalysisService) {
-		this.impactAnalysisService = impactAnalysisService;
-	}
+    @Autowired
+    public ImpactAnalysisDataEndpointsController(DataAnalysisService impactAnalysisService) {
+        this.impactAnalysisService = impactAnalysisService;
+    }
 
-	@ApiOperation(value = "Returns new cases reported globally today. Today = current machine time. Optionally date can be passed in request parameter", authorizations = {@Authorization(value = "Bearer")})
-	@RequestMapping(value = "/api/data/newcases/today", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public @ResponseBody NewCasesToday getNewCases(@RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "MM/dd/yy") Date date, @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader) throws IOException, ServletException {
-		return impactAnalysisService.getNewCasesToday(date);
-	}
+    @ApiOperation(value = "Returns new cases reported globally today. Today = UTC time. Optionally date can be passed in request parameter", authorizations = {
+            @Authorization(value = "Bearer") })
+    @RequestMapping(value = "/api/data/newcases/today", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    public @ResponseBody NewCasesToday getNewCases(@RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "MM/dd/yy") Date date,
+            @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader)
+            throws IOException, ServletException {
+        return impactAnalysisService.getNewCases(date);
+    }
 
-	@ApiOperation(value = "Returns newly reported cases today in all countries. today = current machine time", authorizations = {@Authorization(value = "Bearer")})
-	@RequestMapping(value = "/api/data/newcases/countrywise", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public @ResponseBody CountryWiseCases getNewCasesCountryWise(@RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader) throws IOException, ServletException {
-		return impactAnalysisService.getNewCasesCountrywise(null);
-	}
+    @ApiOperation(value = "Returns newly reported cases in all countries till the date for which data is available", authorizations = {
+            @Authorization(value = "Bearer") })
+    @RequestMapping(value = "/api/data/newcases/countrywise", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    public @ResponseBody CountryWiseCases getNewCasesCountryWise(
+            @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader)
+            throws IOException, ServletException {
+        return impactAnalysisService.getNewCasesCountrywise(impactAnalysisService.maxDateForWhichDataIsAvailable());
+    }
 
-	@ApiOperation(value = "Returns newly reported cases today in single country passed in request parameter. today = current machine time", authorizations = {@Authorization(value = "Bearer")})
-	@RequestMapping(value = "/api/data/newcases/country", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public @ResponseBody CasesInfo getNewCasesForCountry(@RequestParam(value = "country") String country, @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader) throws IOException, ServletException {
-		return impactAnalysisService.getNewCasesReportedInCountryToday(country);
-	}
+    @ApiOperation(value = "Returns newly reported cases today in single country passed in request parameter. today = current machine time", authorizations = {
+            @Authorization(value = "Bearer") })
+    @RequestMapping(value = "/api/data/newcases/country", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    public @ResponseBody CasesInfo getNewCasesForCountry(@RequestParam(value = "country") String country,
+            @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader)
+            throws IOException, ServletException {
+        return impactAnalysisService.getNewCasesReportedInCountry(country);
+    }
 
-	@ApiOperation(value = "Returns TOP N countries with highest reported cases today. Today = current machine time", authorizations = {@Authorization(value = "Bearer")})
-	@RequestMapping(value = "/api/data/newcases/topcountries", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public @ResponseBody CountryWiseCases getTopNCountriesWithNewCasesToday(@RequestParam(value = "count") int count, @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader) throws IOException, ServletException {
-		return impactAnalysisService.getTopNCountriesWithNewCasesToday(count);
-	}
+    @ApiOperation(value = "Returns TOP N countries with highest reported cases today. Today = current machine time", authorizations = {
+            @Authorization(value = "Bearer") })
+    @RequestMapping(value = "/api/data/newcases/topcountries", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    public @ResponseBody CountryWiseCases getTopNCountriesWithNewCasesToday(@RequestParam(value = "count") int count,
+            @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader)
+            throws IOException, ServletException {
+        return impactAnalysisService.getTopNCountriesWithNewCases(count);
+    }
 
-	@ApiOperation(value = "Returns new cases reported each day since requested date in requested country.", authorizations = {@Authorization(value = "Bearer")})
-	@RequestMapping(value = "/api/data/newcases/sincedate", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	public @ResponseBody DatewiseCountryData getTopNCountriesWithNewCasesToday(@RequestParam(value = "date") @DateTimeFormat(pattern = "MM/dd/yy") Date date, @RequestParam(value = "country") String country, @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader) throws IOException, ServletException {
-		return impactAnalysisService.getCasesDataInCountrySinceDate(country, date);
-	}
+    @ApiOperation(value = "Returns new cases reported each day since requested date in requested country.", authorizations = {
+            @Authorization(value = "Bearer") })
+    @RequestMapping(value = "/api/data/newcases/sincedate", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    public @ResponseBody DatewiseCountryData getTopNCountriesWithNewCasesSinceToday(
+            @RequestParam(value = "date", required = true) @DateTimeFormat(pattern = "MM/dd/yy") Date date,
+            @RequestParam(value = "country") String country,
+            @RequestHeader(value = "Authorization", defaultValue = "", required = true) String authorizationHeader)
+            throws IOException, ServletException {
+        return impactAnalysisService.getCasesDataInCountrySinceDate(country, date);
+    }
 
 }

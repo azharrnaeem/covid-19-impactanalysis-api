@@ -11,23 +11,30 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class InMemoryParsedData {
-	private Map<Date, Map<String, Long>> dateWiseCasesData;
-	private List<Date> sortedKeys;
+    private Map<Date, Map<String, Long>> dateWiseCasesData;
+    private List<Date> sortedKeys;
+    private Date maxDate;
 
-	public Map<Date, Map<String, Long>> getDateWiseCasesData() {
-		return dateWiseCasesData;
-	}
+    public Map<Date, Map<String, Long>> getDateWiseCasesData() {
+        return dateWiseCasesData;
+    }
 
-	public void setDateWiseCasesData(Map<Date, Map<String, Long>> dateWiseCasesData) {
-		this.dateWiseCasesData = dateWiseCasesData;
-	}
+    public void setDateWiseCasesData(Map<Date, Map<String, Long>> dateWiseCasesData) {
+        this.dateWiseCasesData = dateWiseCasesData;
+    }
 
-	public List<Date> getSortedKeys() {
-		return sortedKeys;
-	}
+    public List<Date> getSortedKeys() {
+        return sortedKeys;
+    }
 
-	public void setSortedKeys(List<Date> sortedKeys) {
-		this.sortedKeys = sortedKeys;
-	}
+    public void setSortedKeys(List<Date> sortedKeys) {
+        this.sortedKeys = sortedKeys;
+        if (sortedKeys != null) {
+            maxDate = sortedKeys.get(sortedKeys.size() - 1);
+        }
+    }
 
+    public Date getMaxDate() {
+        return maxDate;
+    }
 }
