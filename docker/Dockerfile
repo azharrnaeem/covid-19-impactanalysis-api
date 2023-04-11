@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11:jre-11.0.6_10-alpine
+FROM openjdk:11
 LABEL org.opencontainers.image.authors="azharrnaeem@gmail.com"
 EXPOSE 8080
 
