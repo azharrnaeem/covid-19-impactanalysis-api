@@ -253,6 +253,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<skip>true</skip>
 					<images>
 						<image>
 							<alias>iaa</alias>
