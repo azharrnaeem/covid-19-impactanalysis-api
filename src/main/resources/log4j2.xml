@@ -2,7 +2,7 @@
 <Configuration monitorInterval="600" name="impactanalysisapi" packages="com.api.impactanalysis">
 	<Properties>
 	    <Property name="logsFolder">logs</Property>
-		<Property name="logsLevel">INFO</Property>
+		<Property name="logsLevel">DEBUG</Property>
 	    <property name="logsBackupFolder">backup</property>
 	    <property name="pattern">[%d{MMM dd, yyyy HH:mm:ss,SSS}][%p][%t][%c{1}] - %m%n%ex</property>
 	    <property name="sizeBasedTriggeringPolicyValue">51200 KB</property> <!-- On every 50 MB -->
