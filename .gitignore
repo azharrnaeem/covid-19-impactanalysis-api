@@ -43,3 +43,6 @@ build/
 
 .terraform.lock.hcl
 .terragrunt-cache/
+
+**/logs/*
+**/docker/*.jar
